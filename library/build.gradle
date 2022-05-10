@@ -1,8 +1,18 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'maven-publish'
 
 afterEvaluate {
-  apply from: '../gradle/release/publish.gradle'
+  publishing {
+    publications {
+      release(MavenPublication) {
+        from components.release
+        groupId = 'kady.muhammad'
+        artifactId = 'CustomExoMedia'
+        version = '1.0.0'
+      }
+    }
+  }
 }
 
 dependencies {
