@@ -37,6 +37,7 @@ import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.drm.DrmSessionManagerProvider
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.TrackGroupArray
+import com.google.android.exoplayer2.upstream.DefaultLoadErrorHandlingPolicy
 import com.google.android.exoplayer2.util.Util
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
@@ -58,17 +59,26 @@ class ExoMediaPlayerImpl(
         ExoPlayer.Builder(
             config.context,
             config.rendererFactory,
-            config.mediaSourceFactory,
+            config.mediaSourceFactory
+                .setLoadErrorHandlingPolicy(CustomLoadErrorLoadPolicy()),
             config.trackManager.selector,
             config.loadControl,
             config.bandwidthMeter,
             config.analyticsCollector
-        ).build().also {
-            it.addListener(this)
-            it.addListener(rendererListener)
-            it.addListener(config.analyticsCollector)
+        )
+            .build().also {
+                it.addListener(this)
+                it.addListener(rendererListener)
+                it.addListener(config.analyticsCollector)
+            }
+    }
+
+    private class CustomLoadErrorLoadPolicy : DefaultLoadErrorHandlingPolicy() {
+        override fun getMinimumLoadableRetryCount(dataType: Int): Int {
+            return Int.MAX_VALUE
         }
     }
+
 
     // TODO: shouldn't stopped/prepared be in the state store?
     private val stopped = AtomicBoolean()
